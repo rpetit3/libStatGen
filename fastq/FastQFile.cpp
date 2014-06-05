@@ -195,7 +195,8 @@ bool FastQFile::keepReadingFile()
 FastQStatus::Status FastQFile::validateFastQFile(const String& filename,
                                                  bool printBaseComp,
                                                  BaseAsciiMap::SPACE_TYPE spaceType,
-                                                 bool printQualAvg)
+                                                 bool printQualAvg,
+                                                 int seqLimit)
 {
    // Open the fastqfile.
    if(openFile(filename, spaceType) != FastQStatus::FASTQ_SUCCESS)
@@ -203,6 +204,12 @@ FastQStatus::Status FastQFile::validateFastQFile(const String& filename,
       // Failed to open the specified file.
       return(FastQStatus::FASTQ_OPEN_ERROR);
    }
+   
+   // Check if user wants to limit the number of reads to verify
+   bool setLimit = false;
+   if (seqLimit > 0) 
+        setLimit = true;
+   
 
    // Track the total number of sequences that were validated.
    int numSequences = 0;
@@ -223,6 +230,9 @@ FastQStatus::Status FastQFile::validateFastQFile(const String& filename,
          // Read a sequence and it is either valid or invalid, but
          // either way, a sequence was read, so increment the sequence count.
          ++numSequences;
+         
+         if (setLimit && seqLimit <= numSequences)
+            break;
       }
       else
       {

@@ -90,7 +90,8 @@ class FastQFile
     FastQStatus::Status validateFastQFile(const String &filename,  
                                           bool printBaseComp,
                                           BaseAsciiMap::SPACE_TYPE spaceType,
-                                          bool printQualAvg = false);
+                                          bool printQualAvg = false,
+                                          int seqLimit = 0);
 
     /// Read 1 FastQSequence, validating it.
     FastQStatus::Status readFastQSequence();
