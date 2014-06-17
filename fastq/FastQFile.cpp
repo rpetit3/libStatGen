@@ -196,7 +196,8 @@ FastQStatus::Status FastQFile::validateFastQFile(const String& filename,
                                                  bool printBaseComp,
                                                  BaseAsciiMap::SPACE_TYPE spaceType,
                                                  bool printQualAvg,
-                                                 int seqLimit)
+                                                 int seqLimit,
+                                                 bool qualRange)
 {
    // Open the fastqfile.
    if(openFile(filename, spaceType) != FastQStatus::FASTQ_SUCCESS)
@@ -204,6 +205,8 @@ FastQStatus::Status FastQFile::validateFastQFile(const String& filename,
       // Failed to open the specified file.
       return(FastQStatus::FASTQ_OPEN_ERROR);
    }
+   phredMin = 255;
+   phredMax = 0;
    
    // Check if user wants to limit the number of reads to verify
    bool setLimit = false;
@@ -250,6 +253,11 @@ FastQStatus::Status FastQFile::validateFastQFile(const String& filename,
    if(printQualAvg)
    {
       printAvgQual();
+   }
+   
+   if (qualRange)
+   {
+      printQualRange();
    }
 
    std::string finishMessage = "Finished processing ";
@@ -841,7 +849,15 @@ bool FastQFile::validateQualityString(int offset)
       }
       else
       {
-          myQualPerCycle[i] += BaseUtilities::getPhredBaseQuality(myQualityString[i]);
+          uint8_t score = BaseUtilities::getPhredBaseQuality(myQualityString[i]);
+          if (score > phredMax) 
+          {
+            phredMax = score;
+          } 
+          else if (score < phredMin) {
+            phredMin = score;
+          }
+          myQualPerCycle[i] += score;
           myCountPerCycle[i] += 1;
       }
    }
@@ -958,4 +974,9 @@ void FastQFile::printAvgQual()
        avgQual = sumQual / count;
    }
    std::cout << "Overall Average Phred Quality = " << avgQual << std::endl;
+}
+
+void FastQFile::printQualRange()
+{
+   std::cout << "Phred Quality Range: " << int(phredMin) << "," << int(phredMax) << std::endl;
 }

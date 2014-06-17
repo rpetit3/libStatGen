@@ -91,7 +91,8 @@ class FastQFile
                                           bool printBaseComp,
                                           BaseAsciiMap::SPACE_TYPE spaceType,
                                           bool printQualAvg = false,
-                                          int seqLimit = 0);
+                                          int seqLimit = 0,
+                                          bool qualRange = false);
 
     /// Read 1 FastQSequence, validating it.
     FastQStatus::Status readFastQSequence();
@@ -113,6 +114,10 @@ class FastQFile
     {
         return(myBaseComposition.getSpaceType());
     }
+    
+    // Quality score range
+    uint8_t phredMin;
+    uint8_t phredMax;
     
 private:
     // Validates a single fastq sequence from myFile.
@@ -166,6 +171,8 @@ private:
     bool isTimeToQuit();
 
     void printAvgQual();
+    
+    void printQualRange();
 
     //////////////////////////////////////////////////////////////////////
     // Following member data elements are reset for each validated sequence.
